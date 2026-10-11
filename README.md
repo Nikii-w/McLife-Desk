@@ -28,7 +28,8 @@
 
 如果你也想知道自己本月是哪一等级、属于哪种麦门人格，欢迎安装试试。觉得这个工作台有点意思，或者它刚好帮到了你，**欢迎点一下右上角的 ⭐ Star**，让更多人一起看看自己的麦门人生。
 
-<img width="1152" height="1920" alt="image" src="https://github.com/user-attachments/assets/1f532de2-468c-4dd3-9d54-7aadb6ec35f6" />
+<img width="1440" height="2560" alt="image" src="https://github.com/user-attachments/assets/1ed5eb99-7dea-40cd-88d4-c38fae98de13" />
+
 
 
 ---
@@ -49,9 +50,7 @@
 
 **McLife Desk** 把这些零散的订单，整理成一个属于你的个人工作台，让每次点餐都能被记录、被理解，也能成为下一次更适合自己的选择参考。
 
-
-
-
+<img width="1344" height="1792" alt="image" src="https://github.com/user-attachments/assets/5978de2a-1470-492d-8c54-dbb2e9ad309b" />
 
 ---
 
