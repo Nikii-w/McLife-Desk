@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>麦麦人生工作台 · Pixel Edition</title>
+<style>
+  :root{
+    --red:#DA291C; --red-dk:#A31D12; --yellow:#FFC72C; --yellow-dk:#E8A800;
+    --ink:#2B1A12; --ink2:#5C4A3D; --muted:#9A8B7E;
+    --paper:#FFFDF4; --bg:#FFF3D6; --line:#2B1A12;
+    --green:#3E9B4F; --purple:#8E5BC0; --blue:#2D7DD2;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    color:var(--ink);
+    background-color:var(--bg);
+    background-image:
+      linear-gradient(45deg, rgba(255,199,44,.12) 25%, transparent 25%, transparent 75%, rgba(255,199,44,.12) 75%),
+      linear-gradient(45deg, rgba(255,199,44,.12) 25%, transparent 25%, transparent 75%, rgba(255,199,44,.12) 75%);
+    background-size:28px 28px; background-position:0 0,14px 14px;
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+    font-size:14px; line-height:1.55;
+  }
+  .num, .amt, .v, .lv-name{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.5px}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 18px 70px}
+
+  /* ---------- pixel primitives ---------- */
+  .card{
+    background:var(--paper); border:3px solid var(--line); border-radius:4px;
+    box-shadow:6px 6px 0 rgba(43,26,18,.9); margin-bottom:20px; overflow:hidden;
+    image-rendering:pixelated;
+  }
+  .card-hd{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    padding:12px 16px; background:var(--yellow); border-bottom:3px solid var(--line);
+  }
+  .card-hd.red{background:var(--red);color:#fff}
+  .card-hd h2{font-size:15px;margin:0;font-weight:800;display:flex;align-items:center;gap:8px;letter-spacing:1px}
+  .card-hd .hint{font-size:12px;color:var(--ink2);font-weight:600}
+  .card-hd.red .hint{color:#FFD9D4}
+  .card-bd{padding:16px}
+
+  .pbtn{
+    display:inline-flex;align-items:center;gap:6px;
+    border:3px solid var(--line); background:#fff; color:var(--ink);
+    border-radius:0; padding:8px 14px; font-size:13px; font-weight:700; cursor:pointer;
+    box-shadow:4px 4px 0 var(--line); transition:transform .05s, box-shadow .05s;
+    font-family:inherit; letter-spacing:.5px;
+  }
+  .pbtn:hover{background:var(--yellow)}
+  .pbtn:active{transform:translate(3px,3px); box-shadow:1px 1px 0 var(--line)}
+  .pbtn.red{background:var(--red);color:#fff}
+  .pbtn.red:hover{background:var(--red-dk)}
+  .pbtn.sm{padding:5px 10px;font-size:12px;box-shadow:3px 3px 0 var(--line)}
+  .pbtn:disabled{opacity:.5;cursor:not-allowed}
+
+  .chip{
+    border:2px solid var(--line);background:#fff;border-radius:0;padding:6px 12px;font-size:12.5px;
+    cursor:pointer;color:var(--ink);font-weight:700;box-shadow:3px 3px 0 var(--line);transition:.05s;
+  }
+  .chip:hover{background:var(--yellow)}
+  .chip:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+  .chip.on{background:var(--red);color:#fff}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--line);
+    border-radius:0;padding:5px 11px;font-size:12px;color:var(--ink2);font-weight:700;box-shadow:3px 3px 0 rgba(43,26,18,.55);
+  }
+  .pill b{color:var(--red)}
+
+  /* ---------- header ---------- */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .mlogo{
+    width:56px;height:56px;background:var(--red);border:3px solid var(--line);
+    box-shadow:4px 4px 0 var(--line);display:flex;align-items:center;justify-content:center;flex:none;
+  }
+  h1{font-size:21px;margin:0;font-weight:900;letter-spacing:2px}
+  h1 .hl{color:var(--red)}
+  .sub{color:var(--ink2);font-size:12px;margin-top:3px;font-weight:600}
+  .top-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .marquee{
+    border-top:3px solid var(--line);border-bottom:3px solid var(--line);
+    background:var(--red);color:#FFC72C;font-weight:800;font-size:12.5px;letter-spacing:2px;
+    padding:5px 0;overflow:hidden;white-space:nowrap;margin-bottom:20px;
+  }
+  .marquee span{display:inline-block;padding-left:100%;animation:mq 22s linear infinite}
+  @keyframes mq{to{transform:translateX(-100%)}}
+
+  /* ---------- identity card ---------- */
+  .idcard{
+    display:grid;grid-template-columns:220px 1fr;gap:0;
+    border:3px solid var(--line);box-shadow:6px 6px 0 rgba(43,26,18,.9);background:var(--paper);
+  }
+  .idcard .left{
+    background:var(--red);color:#fff;padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px;
+    border-right:3px solid var(--line);position:relative;overflow:hidden;
+  }
+  .idcard .left::after{
+    content:"M";position:absolute;right:-14px;bottom:-26px;font-size:110px;font-weight:900;
+    color:rgba(255,199,44,.25);font-family:ui-monospace,Menlo,monospace;
+  }
+  .idcard .right{padding:16px 18px;min-width:0}
+  .lv-name{font-size:26px;font-weight:900;color:var(--red);letter-spacing:1px;line-height:1.2}
+  .lv-desc{font-size:12.5px;color:var(--ink2);margin-top:4px}
+  .month-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .tagrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .ptag{
+    border:2px solid var(--line);padding:4px 10px;font-size:12px;font-weight:800;
+    background:var(--yellow);box-shadow:3px 3px 0 rgba(43,26,18,.7);
+  }
+  .ptag.blue{background:#DCEBFF}
+  .ptag.green{background:#E3F4E5}
+  .ptag.purple{background:#EFE3FB}
+  .ptag.gray{background:#EEE;color:var(--muted)}
+  .idstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+  .idstat{border:2px solid var(--line);padding:9px 10px;background:#FFF8E4;box-shadow:3px 3px 0 rgba(43,26,18,.55)}
+  .idstat .k{font-size:11px;color:var(--ink2);font-weight:700}
+  .idstat .v{font-size:18px;font-weight:900;margin-top:3px}
+  .persona-line{margin-top:12px;font-size:13px;font-weight:700}
+  .persona-line b{color:var(--red)}
+  .idfoot{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.7;border-top:2px dashed var(--line);padding-top:8px}
+  .id-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+  /* ---------- kpi ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .kpi{border:2px solid var(--line);padding:12px 13px;background:#FFF8E4;box-shadow:4px 4px 0 rgba(43,26,18,.7)}
+  .kpi.accent{background:var(--yellow)}
+  .kpi .k{font-size:12px;color:var(--ink2);font-weight:700}
+  .kpi .v{font-size:21px;font-weight:900;margin-top:5px}
+  .kpi .v small{font-size:12px;font-weight:700;color:var(--ink2);margin-left:3px}
+  .kpi .x{font-size:11px;color:var(--muted);margin-top:3px;font-weight:600}
+
+  /* ---------- calendar ---------- */
+  .cal-head{display:flex;align-items:center;gap:10px}
+  .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:14px 0 7px}
+  .dow span{text-align:center;font-size:11px;color:var(--ink2);font-weight:800}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+  .cell{
+    min-height:80px;border:2px solid var(--line);padding:6px 7px;background:#fff;
+    position:relative;box-shadow:3px 3px 0 rgba(43,26,18,.35);
+  }
+  .cell.blank{border:none;background:transparent;box-shadow:none}
+  .cell.has{cursor:pointer;background:#FFF3D6}
+  .cell.has:hover{background:var(--yellow);transform:translate(-1px,-1px);box-shadow:4px 4px 0 rgba(43,26,18,.7)}
+  .cell.today{outline:3px solid var(--red);outline-offset:-3px}
+  .cell .d{font-size:12px;font-weight:900;display:flex;justify-content:space-between;align-items:center}
+  .cell .dot{width:8px;height:8px;background:var(--red)}
+  .cell .amt{font-size:13px;font-weight:900;color:var(--red);margin-top:4px}
+  .cell .it{font-size:11px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cell .tags{position:absolute;left:7px;bottom:6px;display:flex;gap:4px;flex-wrap:wrap}
+  .mini{font-size:10px;padding:1px 5px;border:1.5px solid var(--line);background:#fff;font-weight:800;white-space:nowrap}
+  .burger-stamp{position:absolute;top:2px;right:2px;font-size:20px;transform:rotate(-14deg);filter:drop-shadow(1px 1px 0 rgba(43,26,18,.55));pointer-events:none;line-height:1}
+  .prefs-toggle{cursor:pointer;user-select:none}
+  .prefs-toggle .caret{display:inline-block;margin-left:8px;transition:transform .15s;font-size:14px}
+  .prefs-toggle.open .caret{transform:rotate(90deg)}
+  #prefsBox.hidden{display:none}
+  .mini.est{background:var(--yellow)}
+  .mini.manual{background:#DCEBFF}
+  .mini.cal{background:#E3F4E5}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--ink2);font-weight:600}
+  .legend i{display:inline-block;width:10px;height:10px;border:1.5px solid var(--line);margin-right:5px;vertical-align:-1px}
+
+  /* ---------- trend / today / orders ---------- */
+  .trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .chart-box{border:2px solid var(--line);padding:12px 14px 6px;background:#FFF8E4;box-shadow:4px 4px 0 rgba(43,26,18,.55)}
+  .chart-box h3{font-size:12.5px;margin:0 0 3px;font-weight:800}
+  .chart-box .cap{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600}
+  svg.chart{width:100%;height:132px;display:block;overflow:visible}
+
+  .empty{
+    text-align:center;color:var(--ink2);font-size:13px;font-weight:600;padding:26px 14px;
+    border:3px dashed var(--line);background:#FFF8E4;
+  }
+  .today-row{display:flex;gap:12px;align-items:center;border:2px solid var(--line);padding:12px 14px;margin-bottom:9px;background:#FFF8E4;box-shadow:3px 3px 0 rgba(43,26,18,.5)}
+  .today-row .t{font-size:12px;color:var(--ink2);min-width:52px;font-weight:700}
+  .today-row .m{flex:1;min-width:0}
+  .today-row .m .s1{font-weight:800}
+  .today-row .m .s2{font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .today-row .p{font-weight:900;color:var(--red)}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:10px;border-bottom:2px solid rgba(43,26,18,.25);text-align:left;vertical-align:top}
+  th{font-size:12px;color:var(--ink2);font-weight:800;background:var(--yellow);border-bottom:2px solid var(--line);white-space:nowrap}
+  tbody tr:hover{background:#FFF3D6}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
+
+  .note{font-size:12px;border:2px solid var(--line);padding:9px 12px;margin-top:12px;line-height:1.6;font-weight:600;box-shadow:3px 3px 0 rgba(43,26,18,.4)}
+  .note.warn{background:#FFF0C2}
+  .note.info{background:#DCEBFF}
+  .note.dim{background:#F4EEE2;color:var(--ink2)}
+
+  .foot{margin-top:24px;font-size:11.5px;color:var(--ink2);line-height:1.8;border:3px solid var(--line);background:var(--paper);box-shadow:6px 6px 0 rgba(43,26,18,.9);padding:14px 16px}
+  .foot b{color:var(--red)}
+
+  /* ---------- modal / quiz ---------- */
+  .mask{position:fixed;inset:0;background:rgba(43,26,18,.6);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+  .mask.on{opacity:1;pointer-events:auto}
+  .modal{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-48%) scale(.96);opacity:0;pointer-events:none;
+    width:min(620px,94vw);max-height:88vh;z-index:41;background:var(--paper);
+    border:3px solid var(--line);box-shadow:10px 10px 0 rgba(43,26,18,.9);
+    display:flex;flex-direction:column;transition:.18s;
+  }
+  .modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .modal-hd{background:var(--red);color:#fff;padding:14px 18px;border-bottom:3px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .modal-hd h3{margin:0;font-size:15px;font-weight:900;letter-spacing:1px}
+  .modal-bd{padding:18px;overflow:auto;flex:1}
+  .q-idx{font-size:12px;font-weight:800;color:var(--muted)}
+  .q-title{font-size:16px;font-weight:900;margin:6px 0 14px}
+  .opts{display:flex;flex-direction:column;gap:9px}
+  .opt{
+    border:2px solid var(--line);background:#fff;padding:11px 14px;cursor:pointer;font-weight:700;font-size:13.5px;
+    text-align:left;box-shadow:3px 3px 0 rgba(43,26,18,.6);font-family:inherit;transition:.05s;
+  }
+  .opt:hover{background:var(--yellow)}
+  .opt:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+  .quiz-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px;flex-wrap:wrap}
+  .result-big{text-align:center;padding:8px 0 4px}
+  .result-big .rname{font-size:24px;font-weight:900;color:var(--red);letter-spacing:1px}
+  .result-big .rkw{font-size:13px;color:var(--ink2);font-weight:700;margin-top:6px}
+  .result-copy{border:2px solid var(--line);background:#FFF8E4;padding:12px 14px;margin-top:14px;font-size:13px;font-weight:600;line-height:1.7}
+  .scorebars{margin-top:14px}
+  .sb{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11.5px;font-weight:700}
+  .sb .lbl{width:76px;color:var(--ink2);flex:none}
+  .sb .bar{flex:1;height:12px;border:2px solid var(--line);background:#fff;position:relative}
+  .sb .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--yellow)}
+  .sb .bar.top i{background:var(--red)}
+  .sb .n{width:26px;text-align:right;flex:none}
+
+  /* ---------- drawer ---------- */
+  .drawer{
+    position:fixed;top:0;right:0;height:100%;width:min(460px,92vw);background:var(--paper);z-index:41;
+    transform:translateX(103%);transition:transform .24s steps(8);border-left:3px solid var(--line);
+    display:flex;flex-direction:column;box-shadow:-10px 0 0 rgba(43,26,18,.35);
+  }
+  .drawer.on{transform:none}
+  .drawer-hd{padding:16px 18px;border-bottom:3px solid var(--line);background:var(--yellow);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .drawer-hd h3{margin:0;font-size:15px;font-weight:900}
+  .drawer-hd .sub2{font-size:12px;color:var(--ink2);margin-top:3px;font-weight:600}
+  .drawer-bd{padding:16px 18px 30px;overflow:auto;flex:1}
+  .close{border:2px solid var(--line);background:#fff;border-radius:0;width:30px;height:30px;cursor:pointer;font-weight:900;box-shadow:2px 2px 0 var(--line)}
+  .close:active{transform:translate(2px,2px);box-shadow:none}
+  .kv{display:grid;grid-template-columns:78px 1fr;gap:8px 12px;font-size:13px;margin-bottom:14px}
+  .kv .k{color:var(--muted);font-weight:700}
+  .sec-t{font-size:12px;font-weight:900;margin:16px 0 8px;padding-bottom:5px;border-bottom:2px solid var(--line);letter-spacing:1px}
+
+  @media (max-width:900px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .trend-grid{grid-template-columns:1fr}
+    .idcard{grid-template-columns:1fr}
+    .idcard .left{border-right:none;border-bottom:3px solid var(--line);flex-direction:row;justify-content:flex-start}
+    .idstats{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:620px){
+    .wrap{padding:16px 12px 50px}
+    .kpis{grid-template-columns:1fr 1fr}
+    .cell{min-height:66px;padding:5px}
+    .cell .it,.cell .tags{display:none}
+    .card-bd{padding:12px}
+    table{font-size:12px}
+    th:nth-child(2),td:nth-child(2){display:none}
+  }
+  @media (prefers-reduced-motion: reduce){ .marquee span{animation:none;padding-left:0} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">
+      <div class="mlogo" id="mlogo"></div>
+      <div>
+        <h1>麦麦人生<span class="hl">工作台</span></h1>
+        <div class="sub" id="generatedAt">—</div>
+      </div>
+    </div>
+    <div class="top-actions" id="profilePills"></div>
+  </div>
+
+  <div class="marquee"><span>i'm lovin' it · 麦麦人生 · 好吃到跳起来 · BA DA BA BA BA · 麦麦人生 ·</span></div>
+
+  <!-- 1. 麦门身份卡 -->
+  <section class="card" style="border:none;box-shadow:none;background:transparent;margin-bottom:20px">
+    <div class="card-hd red" style="border:3px solid var(--line);border-bottom:none;box-shadow:6px 6px 0 rgba(43,26,18,.9)">
+      <h2>🍟 麦门身份卡</h2>
+      <span class="hint">趣味消费档案 · 非官方认证</span>
+    </div>
+    <div class="idcard" style="border-top:none" id="idcard"></div>
+  </section>
+
+  <!-- 1.5 饮食偏好（默认折叠，点击标题展开） -->
+  <section class="card">
+    <div class="card-hd prefs-toggle" id="prefsToggle" style="cursor:pointer"><h2>🥗 饮食偏好</h2><span class="hint">点击展开调整 · 同步指令落盘档案<span class="caret">▶</span></span></div>
+    <div class="card-bd hidden" id="prefsBox"></div>
+  </section>
+
+  <!-- 2. 本月概览 -->
+  <section class="card">
+    <div class="card-hd"><h2>📊 本月概览</h2><span class="hint" id="monthRange">—</span></div>
+    <div class="card-bd"><div class="kpis" id="kpis"></div></div>
+  </section>
+
+  <!-- 3. 麦麦点餐日历 -->
+  <section class="card">
+    <div class="card-hd">
+      <h2>📅 麦麦点餐日历</h2>
+      <div class="cal-head">
+        <button class="pbtn sm" id="prevM" aria-label="上个月">‹</button>
+        <span class="num" id="calTitle" style="font-weight:900;min-width:110px;text-align:center">—</span>
+        <button class="pbtn sm" id="nextM" aria-label="下个月">›</button>
+      </div>
+    </div>
+    <div class="card-bd">
+      <div class="dow"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+      <div class="grid" id="calGrid"></div>
+      <div class="legend">
+        <span><i style="background:#DA291C"></i>有麦当劳订单</span>
+        <span><i style="background:#FFC72C"></i>热量为估算值</span>
+        <span><i style="background:#DCEBFF"></i>手动补录</span>
+        <span>点击有订单的日期查看当日详情</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 今日摘要 -->
+  <section class="card">
+    <div class="card-hd"><h2>🍔 今日摘要</h2><span class="hint" id="todayLabel">—</span></div>
+    <div class="card-bd" id="todayBox"></div>
+  </section>
+
+  <!-- 5. 消费与热量趋势 -->
+  <section class="card">
+    <div class="card-hd"><h2>📈 消费与热量趋势</h2><span class="hint">最近 30 天 · 已记录数据</span></div>
+    <div class="card-bd">
+      <div class="trend-grid">
+        <div class="chart-box">
+          <h3>每日消费金额</h3>
+          <div class="cap" id="spendCap">—</div>
+          <svg class="chart" id="spendChart" viewBox="0 0 640 132" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="chart-box">
+          <h3>每日记录热量</h3>
+          <div class="cap" id="calCap">—</div>
+          <svg class="chart" id="calChart" viewBox="0 0 640 132" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+      <div class="note dim" id="trendNote"></div>
+    </div>
+  </section>
+
+  <!-- 6. 今日点餐入口 -->
+  <section class="card">
+    <div class="card-hd"><h2>🚪 今日点餐入口</h2><span class="hint">点击复制，发给 WorkBuddy 即可</span></div>
+    <div class="card-bd"><div class="btn-row" id="entryChips"></div></div>
+  </section>
+
+  <!-- 7. 最近订单 -->
+  <section class="card">
+    <div class="card-hd"><h2>🧾 最近订单</h2><span class="hint" id="ordersHint">—</span></div>
+    <div class="card-bd" id="recentBox"></div>
+  </section>
+
+  <div class="foot">
+    <p><b>本工作台是参赛作品，不是麦当劳官方产品</b>，与麦当劳及其关联公司无隶属或合作关系。麦门等级、行为标签与消费人格均为趣味消费记录，<b>不代表官方认证、官方会员等级或品牌背书</b>；不鼓励为升级而增加消费。</p>
+    <p>热量与营养信息仅供记录与参考，<b>不构成医疗或专业营养建议</b>；数据标注为「已知」或「估算」。菜单、价格、优惠与订单状态以麦当劳中国 MCP 实时返回为准。</p>
+    <p id="footMeta">—</p>
+  </div>
+</div>
+
+<!-- quiz modal -->
+<div class="mask" id="mask"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-hd">
+    <div><h3 id="dTitle">—</h3><div class="sub2" id="dSub">—</div></div>
+    <button class="close" id="dClose" aria-label="关闭">✕</button>
+  </div>
+  <div class="drawer-bd" id="dBody"></div>
+</aside>
+
+<div class="modal" id="quiz">
+  <div class="modal-hd">
+    <h3>🎪 麦门消费人格测试</h3>
+    <button class="close" id="qClose" aria-label="关闭">✕</button>
+  </div>
+  <div class="modal-bd" id="quizBody"></div>
+</div>
+
+<script id="mc-data" type="application/json">{"generated_at":"","data_dir":"","_notice":"演示数据（data_source=demo）。首次初始化后由真实 MCP 订单替换，删除本条即可。","profile":{"schema_version":1,"updated_at":"","city":null,"stores":[],"preferred_channels":[],"budget":{"lunch_weekday":null,"dinner":null,"per_order":null,"currency":"CNY"},"taste":{"liked_categories":[],"disliked_ingredients":[],"beverage_preference":null,"accept_meal_replace":null},"goals":{"track_calories":false,"weekly_order_target":null,"per_order_budget_target":null},"temp_rules":[],"data_preferences":{"allow_read_history":false,"confirmed_by_user":false}},"orders":[{"date":"2026-10-01","order_id":"DEMO-001","store":"示例餐厅A","channel":"到店取餐","total_price":"32.5","total_price_num":32.5,"discount":"","discount_num":null,"items":"巨无霸中套餐×1","items_list":[{"name":"巨无霸中套餐","qty":1}],"total_calories":"","calories_num":null,"nutrition":[],"data_source":"demo","order_status":"订单已完成"},{"date":"2026-09-18","order_id":"DEMO-002","store":"示例餐厅B","channel":"麦乐送外送","total_price":"45.0","total_price_num":45.0,"discount":"","discount_num":null,"items":"麦辣鸡腿堡×1；麦乐鸡5块×1；无糖可乐中杯×1","items_list":[{"name":"麦辣鸡腿堡","qty":1},{"name":"麦乐鸡5块","qty":1},{"name":"无糖可乐中杯","qty":1}],"total_calories":"","calories_num":null,"nutrition":[],"data_source":"demo","order_status":"订单已完成"},{"date":"2026-08-30","order_id":"DEMO-003","store":"示例餐厅A","channel":"到店取餐","total_price":"21.9","total_price_num":21.9,"discount":"","discount_num":null,"items":"板烧鸡腿堡×1","items_list":[{"name":"板烧鸡腿堡","qty":1}],"total_calories":"","calories_num":null,"nutrition":[],"data_source":"demo","order_status":"订单已完成"}],"today":"","today_orders":[],"months":["2026-08","2026-09","2026-10"],"stats":{"anchor_date":"","week":{"label":"本周","start":"","end":"","orders_count":0,"total_spend":0,"avg_price":null,"discount_total":null,"discount_missing_count":0,"calories_known":0.0,"calories_estimated":0.0,"calories_missing_count":0,"store_distribution":{},"channel_distribution":{},"top_items":[],"distinct_item_count":0,"repeat_rate":null,"snack_frequency":{},"max_order":null,"manual_count":0,"mcp_count":0},"month":{"label":"本月","start":"","end":"","orders_count":1,"total_spend":32.5,"avg_price":32.5,"discount_total":null,"discount_missing_count":0,"calories_known":0.0,"calories_estimated":0.0,"calories_missing_count":1,"store_distribution":{},"channel_distribution":{},"top_items":[],"distinct_item_count":0,"repeat_rate":null,"snack_frequency":{},"max_order":null,"manual_count":0,"mcp_count":0},"last7":{"label":"最近 7 天","start":"","end":"","orders_count":0,"total_spend":0,"avg_price":null,"discount_total":null,"discount_missing_count":0,"calories_known":0.0,"calories_estimated":0.0,"calories_missing_count":0,"store_distribution":{},"channel_distribution":{},"top_items":[],"distinct_item_count":0,"repeat_rate":null,"snack_frequency":{},"max_order":null,"manual_count":0,"mcp_count":0},"last30":{"label":"最近 30 天","start":"","end":"","orders_count":2,"total_spend":77.5,"avg_price":38.75,"discount_total":null,"discount_missing_count":0,"calories_known":0.0,"calories_estimated":0.0,"calories_missing_count":2,"store_distribution":{},"channel_distribution":{},"top_items":[],"distinct_item_count":0,"repeat_rate":null,"snack_frequency":{},"max_order":null,"manual_count":0,"mcp_count":0},"all":{"label":"全部记录","start":"2026-08-30","end":"2026-10-01","orders_count":3,"total_spend":99.4,"avg_price":33.13,"discount_total":null,"discount_missing_count":3,"calories_known":0.0,"calories_estimated":0.0,"calories_missing_count":3,"store_distribution":{"示例餐厅A":2,"示例餐厅B":1},"channel_distribution":{"到店取餐":2,"麦乐送外送":1},"top_items":[{"name":"汉堡类","count":3}],"distinct_item_count":4,"repeat_rate":null,"snack_frequency":{},"max_order":{"date":"2026-09-18","amount":45.0},"manual_count":0,"mcp_count":0}}}</script>
+<script>
+(function(){
+  var DATA = {};
+  try { DATA = JSON.parse(document.getElementById('mc-data').textContent || '{}'); } catch(e) { DATA = {}; }
+  var ORDERS = DATA.orders || [];
+  var PROFILE = DATA.profile || {};
+  var STATS = DATA.stats || {};
+  var TODAY = DATA.today || new Date().toISOString().slice(0,10);
+
+  var $ = function(id){ return document.getElementById(id); };
+  var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); };
+  var money = function(v){ if(v==null||v==='') return '—';
+    var n = Number(v); if(isNaN(n)) return '—';
+    return '¥' + (n % 1 === 0 ? n.toFixed(0) : n.toFixed(2)); };
+  var pad = function(n){ return n<10 ? '0'+n : ''+n; };
+
+  /* ================= pixel sprites ================= */
+  var PAL = { R:'#DA291C', Y:'#FFC72C', W:'#FFFFFF', K:'#2B1A12', P:'#9C6FCE', D:'#6A4C93',
+              G:'#3E9B4F', B:'#7A4526', T:'#F5C26B', O:'#E8A800', S:'#C9BFB2', X:'#A08F7F' };
+  function px(rows, size){
+    size = size || 4;
+    var h = rows.length, w = rows[0].length;
+    var rects = [];
+    for(var y=0;y<h;y++){
+      for(var x=0;x<w;x++){
+        var c = rows[y][x];
+        if(!c || c==='.' || c===' ') continue;
+        rects.push('<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="'+(PAL[c]||c)+'"/>');
+      }
+    }
+    return '<svg width="'+(w*size)+'" height="'+(h*size)+'" viewBox="0 0 '+w+' '+h+'" shape-rendering="crispEdges" style="image-rendering:pixelated">'+rects.join('')+'</svg>';
+  }
+  var SPR = {};
+  SPR.arches = [ // 金拱门 M（16 宽，双拱带中缝）
+    ".YYY........YYY.",
+    ".YYYY......YYYY.",
+    ".YYYYY....YYYYY.",
+    ".YY.YYY..YYY.YY.",
+    ".YY..YYYYYY..YY.",
+    ".YY..YYYYYY..YY.",
+    ".YYY..YYYY..YYY.",
+    ".YYYY..YY..YYYY.",
+    ".YYYYY....YYYYY.",
+    ".YYYYYYYYYYYYYY."
+  ];
+  SPR.ronald = [ // 麦当劳叔叔：红发+白脸+黄衣
+    "..RRRRRRRR..",
+    ".RRRRRRRRRR.",
+    "RRWWWWWWWWRR",
+    "RRWKWWWWKWRR",
+    "..WWWWWWWW..",
+    "..WKWWWWKW..",
+    "..WWWWWWWW..",
+    "..WWRRRRWW..",
+    "...WWWWWW...",
+    "..YYYYYYYY..",
+    ".YYRRYYRRYY.",
+    ".YYYYYYYYYY.",
+    "..YYYYYYYY..",
+    "..YY....YY.."
+  ];
+  SPR.grimace = [ // 奶昔哥
+    "..PPPPPPPP..",
+    ".PPPPPPPPPP.",
+    "PPPPPPPPPPPP",
+    "PPWKPPPPWKPP",
+    "PPPPPPPPPPPP",
+    "PPPPPPPPPPPP",
+    "PPKPPPPPPKPP",
+    "PPPKKKKKKPPP",
+    ".PPPPPPPPPP.",
+    ".PPPPPPPPPP.",
+    "..PPP..PPP..",
+    "..PP....PP.."
+  ];
+  SPR.fries = [ // Lv.1 薯条：薯条+带 M 的红盒子
+    ".Y..Y..Y..Y",
+    ".Y..Y..Y..Y",
+    ".Y..Y..Y..Y",
+    ".YY.YY.YY.Y",
+    "KKKKKKKKKKK",
+    "KRRRRRRRRRK",
+    "KRRYYYRRRRK",
+    "KRRYRYRRRRK",
+    "KRRRRRRRRRK",
+    "KRRRRRRRRRK"
+  ];
+  SPR.drink = [ // Lv.2 可乐：吸管+杯盖+红带+金拱门杯身
+    ".........KK.",
+    "..KKKKKKKK..",
+    ".KWWWWWWWWK.",
+    ".KWWWWWWWWK.",
+    ".KRRRRRRRRK.",
+    ".KWYYWWYYWK.",
+    ".KWYYWWYYWK.",
+    ".KWWWWWWWWK.",
+    "..KKKKKKKK.."
+  ];
+  SPR.burger = [ // Lv.3 汉堡：芝麻包+生菜+芝士+肉饼+番茄+底包
+    "...KKKKKKKK...",
+    "..KTTTTTTTTK..",
+    ".KTTWTTTWTTTK.",
+    ".KTTTTTTTTTTK.",
+    ".KGGGGGGGGGGK.",
+    ".KYYYYYYYYYYK.",
+    ".KBBBBBBBBBBK.",
+    ".KRRRRRRRRRRK.",
+    "..KTTTTTTTTK..",
+    "...KKKKKKKK..."
+  ];
+  SPR.burgerGray = [ // 暂无等级：灰色汉堡剪影
+    "...SSSSSSSS...",
+    "..SSSSSSSSSS..",
+    ".SSSSXSSXSSSS.",
+    ".SSSSSSSSSSSS.",
+    ".XXXXXXXXXXXX.",
+    ".SSSSSSSSSSSS.",
+    ".SSSSSSSSSSSS.",
+    "..SSSSSSSSSS..",
+    "...SSSSSSSS..."
+  ];
+  SPR.crown = [ // Lv.4 皇冠：三尖+宝石+底座
+    ".Y...Y...Y...",
+    ".YY..YY..YY..",
+    ".YYY.YYY.YYY.",
+    "YYYYYYYYYYYYY",
+    "YYRYYYRYYYRYY",
+    "YYYYYYYYYYYYY",
+    "OOOOOOOOOOOOO",
+    "OOOOOOOOOOOOO"
+  ];
+  $('mlogo').innerHTML = px(SPR.arches, 3.4);
+
+  /* ================= data helpers ================= */
+  function dayMap(){
+    var m = {};
+    ORDERS.forEach(function(o){
+      if(!o.date) return;
+      (m[o.date] = m[o.date] || []).push(o);
+    });
+    return m;
+  }
+  var DAYS = dayMap();
+
+  function daySummary(list){
+    var amount = 0, hasAmount = false, cal = 0, hasCal = false, est = false, manual = false, items = [];
+    list.forEach(function(o){
+      if(o.total_price_num != null){ amount += o.total_price_num; hasAmount = true; }
+      if(o.calories_num != null){ cal += o.calories_num; hasCal = true; if(o.data_source === 'estimate') est = true; }
+      if(o.data_source === 'manual') manual = true;
+      (o.items_list || []).forEach(function(it){ items.push(it.name); });
+    });
+    return { amount: hasAmount ? amount : null, cal: hasCal ? cal : null, est: est, manual: manual,
+             items: items, count: list.length };
+  }
+
+  /* ============ 月度统计 / 等级 / 标签 ============ */
+  function monthStats(ym){
+    var list = ORDERS.filter(function(o){ return (o.date||'').slice(0,7) === ym; });
+    var amount = 0, discount = 0, hasDiscount = false, items = [], stores = {}, days = {};
+    list.forEach(function(o){
+      if(o.total_price_num != null) amount += o.total_price_num;
+      if(o.discount_num != null){ discount += o.discount_num; hasDiscount = true; }
+      (o.items_list||[]).forEach(function(it){ items.push(it.name); });
+      if(o.store) stores[o.store] = (stores[o.store]||0)+1;
+      days[o.date] = 1;
+    });
+    var itemSet = {}; items.forEach(function(n){ itemSet[n]=1; });
+    var topStore = null, topStoreN = 0, storeTotal = 0;
+    Object.keys(stores).forEach(function(s){ storeTotal += stores[s]; if(stores[s]>topStoreN){ topStore=s; topStoreN=stores[s]; } });
+    var freq = {};
+    items.forEach(function(n){ freq[n]=(freq[n]||0)+1; });
+    var topItem = null, topItemN = 0;
+    Object.keys(freq).forEach(function(n){ if(freq[n]>topItemN){ topItem=n; topItemN=freq[n]; } });
+    return { ym: ym, count: list.length, amount: amount, discount: hasDiscount?discount:null,
+             distinct: Object.keys(itemSet).length, items: items, freq: freq, topItem: topItem, topItemN: topItemN,
+             stores: stores, topStore: topStore, topStoreN: topStoreN, storeTotal: storeTotal,
+             distinctDays: Object.keys(days).length, list: list };
+  }
+
+  var LEVELS = {
+    1:{name:'Lv.1 路过麦香', desc:'偶尔路过，但每次都知道该吃什么。', icon:'fries'},
+    2:{name:'Lv.2 快乐回头客', desc:'你和麦门已经建立了稳定联系。', icon:'drink'},
+    3:{name:'Lv.3 麦门熟客', desc:'菜单不用翻太久，你已经有自己的答案。', icon:'burger'},
+    4:{name:'Lv.4 麦门常驻居民', desc:'这里不是你的常去之处，这里更像你的第二个补给站。', icon:'crown'}
+  };
+  function levelFor(s){
+    if(s.count <= 0) return null;
+    if(s.count <= 2) return 1;
+    if(s.count <= 5) return 2;
+    if(s.count <= 9) return 3;
+    var aux = s.distinctDays >= 2 || s.distinct >= 3 || (s.discount != null && s.discount > 0);
+    return aux ? 4 : 3;
+  }
+
+  function tagsFor(s){
+    if(s.count <= 0) return ['数据不足，暂不生成标签'];
+    var n = s.count, out = [];
+    var chicken = 0, fries = 0, sugarfree = 0, dessert = 0, combo = 0;
+    s.list.forEach(function(o){
+      var txt = (o.items||'') + ' ' + (o.items_list||[]).map(function(i){return i.name;}).join(' ');
+      if(/鸡|翅/.test(txt)) chicken++;
+      if(/薯/.test(txt)) fries++;
+      if(/无糖/.test(txt)) sugarfree++;
+      if(/麦旋风|新地|圣代|圆筒|冰激凌|冰淇淋|派$|派）|雪冰/.test(txt)) dessert++;
+      if(/套餐|随心配|自由选|两件套|三件套|四件套/.test(txt)) combo++;
+    });
+    if(s.discount != null && s.discount > 0) out.push('薅券型选手');
+    if(n >= 3 && s.topItemN / n >= 0.4) out.push('稳定复购派');
+    if(n >= 3 && s.distinct / Math.max(s.items.length,1) >= 0.7 && s.distinct >= 4) out.push('新品探索家');
+    if(n >= 2 && s.topStore && s.topStoreN / n >= 0.6) out.push('门店熟客');
+    if(chicken / n >= 0.6) out.push('鸡肉忠实拥趸');
+    if(fries / n >= 0.5) out.push('薯条守护者');
+    if(sugarfree / n >= 0.4) out.push('无糖饮料派');
+    if(dessert / n >= 0.4) out.push('情绪价值派');
+    if(combo / n >= 0.4) out.push('套餐研究员');
+    if(!out.length) out.push('低调麦门人');
+    return out.slice(0,2);
+  }
+
+  /* ============ 人格测试（localStorage 持久化，可删除） ============ */
+  var PKEY = 'mcd_persona_v1';
+  function getPersona(){ try{ return JSON.parse(localStorage.getItem(PKEY)||'null'); }catch(e){ return null; } }
+  function setPersona(p){ try{ localStorage.setItem(PKEY, JSON.stringify(p)); }catch(e){} }
+
+  var DIMS = {
+    price:{label:'价格敏感度', name:'麦门薅券王', kw:'价格敏感 · 优惠驱动 · 决策理性',
+      copy:'你不是在点餐，你是在和价格系统斗智斗勇。',
+      fit:'优惠比较、价格计算、优惠节省统计'},
+    stable:{label:'稳定偏好度', name:'麦门定番派', kw:'稳定 · 熟悉 · 低风险',
+      copy:'你不是不想尝试新品，只是知道什么才是真正不会出错的选择。',
+      fit:'常点优化、快速复购、门店记忆'},
+    explore:{label:'探索倾向', name:'麦门探索家', kw:'新品 · 限定 · 尝鲜',
+      copy:'对你来说，菜单不是菜单，是一张持续更新的探索地图。',
+      fit:'新品探索、餐品去重、餐品图鉴'},
+    instant:{label:'即时满足倾向', name:'麦门快乐补给党', kw:'饱腹 · 效率 · 刚需',
+      copy:'你的点餐逻辑很简单：快点上，我真的饿了。',
+      fit:'快速点餐、饱腹组合、配送和取餐效率'},
+    emotion:{label:'情绪价值倾向', name:'麦门情绪价值派', kw:'心情 · 仪式感 · 奖励自己',
+      copy:'你买的不只是套餐，还有今天值得被奖励一下的自己。',
+      fit:'甜品、限定餐品、纪念日和特殊场景'},
+    record:{label:'饮食记录倾向', name:'麦门轻负担派', kw:'记录 · 平衡 · 计划',
+      copy:'你不是拒绝快乐，而是希望快乐也能在计划之内。',
+      fit:'营养信息、饮料替换、热量记录和消费趋势'}
+  };
+  var QUIZ = [
+    { q:'点餐时你最优先考虑什么？', o:[['price','价格和优惠'],['stable','熟悉的味道'],['instant','能不能吃饱'],['explore','新品和限定'],['record','轻负担和营养记录']] },
+    { q:'预算还剩 5 元时，你会怎么做？', o:[['instant','加一份薯条'],['instant','换成更大的套餐'],['emotion','买一份甜品'],['record','留到下次使用'],['price','先查有没有更好的优惠']] },
+    { q:'你最不能接受哪种点餐体验？', o:[['price','没有用上优惠'],['explore','点到不好吃的餐品'],['stable','饮料不符合预期'],['stable','薯条不够热'],['instant','配送太慢']] },
+    { q:'你更倾向于哪种点餐方式？', o:[['stable','每次点固定组合'],['explore','偶尔尝试新品'],['price','根据当天优惠决定'],['emotion','根据当天心情决定'],['record','根据当天饮食计划决定']] },
+    { q:'和朋友一起点餐时，你通常是？', o:[['price','负责找优惠的人'],['record','负责统计金额的人'],['explore','负责决定吃什么的人'],['stable','负责收集大家忌口的人'],['instant','什么都可以、跟着大家点的人']] },
+    { q:'你最常出现的点餐场景是？', o:[['stable','工作日午餐'],['instant','下班或加班'],['emotion','周末放松'],['explore','和朋友聚餐'],['instant','临时突然想吃']] },
+    { q:'如果菜单上出现新品，你会？', o:[['explore','立刻尝试'],['stable','看评价后再决定'],['price','等优惠后再尝试'],['stable','还是点熟悉的'],['record','先看营养和配料信息']] },
+    { q:'你希望麦麦人生工作台最常帮你做什么？', o:[['price','找到最划算的点法'],['record','记录我吃过什么'],['price','管理预算和消费'],['explore','推荐没吃过的餐品'],['record','帮我做饮食记录']] }
+  ];
+  var qi = 0, scores = {};
+  function resetQuiz(){ qi = 0; scores = {price:0,stable:0,explore:0,instant:0,emotion:0,record:0}; }
+  function openQuiz(){
+    var saved = getPersona();
+    if(saved && saved.scores){ renderQuizIntro(saved); }
+    else { resetQuiz(); renderQuestion(); }
+    $('mask').classList.add('on'); $('quiz').classList.add('on');
+  }
+  function closeQuiz(){ $('mask').classList.remove('on'); $('quiz').classList.remove('on'); renderIdentity(); }
+  function renderQuizIntro(saved){
+    var html = '<div class="result-big">'+
+      '<div class="q-idx">上一次测试：'+esc((saved.testedAt||'').replace('T',' ').slice(0,16))+'</div>'+
+      '<div class="rname">'+esc(DIMS[saved.main].name)+'</div>'+
+      '<div class="rkw">'+esc(DIMS[saved.main].kw)+'</div></div>'+
+      '<div class="result-copy"><b>🌙 主人格：</b>'+esc(DIMS[saved.main].name)+
+      (saved.sub? '　<b>副标签：</b>'+esc(DIMS[saved.sub].name) : '')+
+      '<br>'+esc(DIMS[saved.main].copy)+
+      '<br><b>适合推荐：</b>'+esc(DIMS[saved.main].fit)+'</div>'+
+      scoreBars(saved.scores, saved.main)+
+      '<div class="quiz-foot"><button class="pbtn red" id="qRetest">重新测试</button>'+
+      '<button class="pbtn" id="qDone">关闭</button></div>';
+    $('quizBody').innerHTML = html;
+    $('qRetest').addEventListener('click', function(){ resetQuiz(); renderQuestion(); });
+    $('qDone').addEventListener('click', closeQuiz);
+  }
+  function scoreBars(sc, main){
+    var max = 1; Object.keys(sc).forEach(function(k){ if(sc[k]>max) max=sc[k]; });
+    var html = '<div class="scorebars">';
+    Object.keys(DIMS).forEach(function(k){
+      html += '<div class="sb"><span class="lbl">'+esc(DIMS[k].label)+'</span>'+
+        '<span class="bar'+(k===main?' top':'')+'"><i style="width:'+Math.round(sc[k]/max*100)+'%"></i></span>'+
+        '<span class="n num">'+sc[k]+'</span></div>';
+    });
+    return html + '</div>';
+  }
+  function renderQuestion(){
+    if(qi >= QUIZ.length){ finishQuiz(); return; }
+    var item = QUIZ[qi];
+    var html = '<div class="q-idx">Q'+(qi+1)+' / '+QUIZ.length+'（可跳过）</div>'+
+      '<div class="q-title">'+esc(item.q)+'</div><div class="opts">';
+    item.o.forEach(function(o, idx){
+      html += '<button class="opt" data-i="'+idx+'">'+esc(o[1])+'</button>';
+    });
+    html += '</div><div class="quiz-foot"><button class="pbtn sm" id="qSkip">跳过这题</button>'+
+      '<span class="hint" style="font-size:11px;color:var(--muted);font-weight:600">结果由答案维度得分计算，非随机生成</span></div>';
+    $('quizBody').innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll('#quizBody .opt'), function(b){
+      b.addEventListener('click', function(){
+        scores[QUIZ[qi].o[Number(b.getAttribute('data-i'))][0]]++;
+        qi++; renderQuestion();
+      });
+    });
+    $('qSkip').addEventListener('click', function(){ qi++; renderQuestion(); });
+  }
+  function finishQuiz(){
+    var keys = Object.keys(scores).sort(function(a,b){ return scores[b]-scores[a]; });
+    var main = keys[0], sub = null;
+    if(scores[keys[1]] > 0 && scores[keys[1]] >= scores[main]*0.75) sub = keys[1];
+    var result = { main: main, sub: sub, scores: scores,
+      testedAt: new Date().toISOString() };
+    setPersona(result);
+    var html = '<div class="result-big">'+
+      '<div style="margin-bottom:6px">'+px(SPR.ronald,5)+'</div>'+
+      '<div class="q-idx">测试完成 · '+new Date().toISOString().replace('T',' ').slice(0,16)+'</div>'+
+      '<div class="rname">'+esc(DIMS[main].name)+'</div>'+
+      '<div class="rkw">'+esc(DIMS[main].kw)+'</div>'+
+      (sub? '<div class="rkw" style="color:var(--purple)">副标签：'+esc(DIMS[sub].name)+'</div>':'')+
+      '</div>'+
+      '<div class="result-copy">'+esc(DIMS[main].copy)+'<br><b>适合推荐：</b>'+esc(DIMS[main].fit)+'</div>'+
+      scoreBars(scores, main)+
+      '<div class="quiz-foot"><button class="pbtn red" id="qRetest2">重新测试</button>'+
+      '<button class="pbtn" id="qCopy">复制结果发给 WorkBuddy 存档</button>'+
+      '<button class="pbtn" id="qDone2">关闭</button></div>';
+    $('quizBody').innerHTML = html;
+    $('qRetest2').addEventListener('click', function(){ resetQuiz(); renderQuestion(); });
+    $('qDone2').addEventListener('click', closeQuiz);
+    $('qCopy').addEventListener('click', function(){
+      var txt = '我的麦门消费人格测试结果：主人格「'+DIMS[main].name+'」'+(sub?'，副标签「'+DIMS[sub].name+'」':'')+
+        '。请把测试结果保存到我的麦门档案。';
+      copyText(txt, this);
+    });
+  }
+  function copyText(txt, btn){
+    var done = function(){ if(!btn) return; var o=btn.textContent; btn.textContent='已复制 ✓'; setTimeout(function(){ btn.textContent=o; },1200); };
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ fb(txt, done); }); }
+    else fb(txt, done);
+    function fb(t, cb){ var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); cb(); }
+  }
+
+  /* ============ 身份卡渲染 ============ */
+  var months = {};
+  ORDERS.forEach(function(o){ if(o.date) months[o.date.slice(0,7)] = 1; });
+  months[TODAY.slice(0,7)] = 1;
+  var MONTHS = Object.keys(months).sort().reverse();
+  var curIdMonth = TODAY.slice(0,7);
+
+  function fmtMonth(ym){ return Number(ym.slice(0,4)) + ' 年 ' + Number(ym.slice(5,7)) + ' 月'; }
+
+  function renderIdentity(){
+    var s = monthStats(curIdMonth);
+    var lv = levelFor(s);
+    var tags = tagsFor(s);
+    var persona = getPersona();
+    var html = '<div class="left">'+
+      '<div>' + (lv ? px(SPR[LEVELS[lv].icon], 7) : px(SPR.burgerGray, 7)) + '</div>'+
+      (lv ? '<div class="lv-name" style="color:#FFC72C;text-align:center">'+esc(LEVELS[lv].name)+'</div>'
+          : '<div class="lv-name" style="color:#FFD9D4;text-align:center;font-size:18px">暂无等级</div>')+
+      '<div style="font-size:11.5px;color:#FFE9E6;text-align:center;line-height:1.5">'+
+        (lv? esc(LEVELS[lv].desc) : '本月还没有订单记录，点一单再来看～')+'</div>'+
+      (lv===4 ? '<div>'+px(SPR.crown,4)+'</div>' : '')+
+      '</div>';
+    html += '<div class="right">'+
+      '<div class="month-row">' + MONTHS.map(function(m){
+        return '<button class="chip'+(m===curIdMonth?' on':'')+'" data-m="'+m+'">'+fmtMonth(m)+'</button>';
+      }).join('') + '</div>';
+    html += '<div class="tagrow">';
+    tags.forEach(function(t,i){
+      var cls = i===0 ? '' : ' blue';
+      html += '<span class="ptag'+cls+'">🏷 ' + esc(t) + '</span>';
+    });
+    html += '</div>';
+    html += '<div class="idstats">'+
+      '<div class="idstat"><div class="k">本月点餐</div><div class="v num">'+(s.count||0)+' 次</div></div>'+
+      '<div class="idstat"><div class="k">本月消费</div><div class="v num">'+(s.count? money(s.amount):'—')+'</div></div>'+
+      '<div class="idstat"><div class="k">优惠节省</div><div class="v num">'+(s.discount!=null? money(s.discount):'未知')+'</div></div>'+
+      '<div class="idstat"><div class="k">探索餐品</div><div class="v num">'+s.distinct+' 种</div></div>'+
+      '</div>';
+    html += '<div class="persona-line">🎭 消费人格：';
+    if(persona && DIMS[persona.main]){
+      html += '<b>'+esc(DIMS[persona.main].name)+'</b>' +
+        (persona.sub? '（副标签：'+esc(DIMS[persona.sub].name)+'）' : '') +
+        ' <span style="color:var(--muted);font-weight:600;font-size:11px">测试于 '+(persona.testedAt||'').replace('T',' ').slice(0,10)+'</span>';
+    } else {
+      html += '<span style="color:var(--muted)">还没测过</span> <button class="pbtn sm red" id="goQuiz">测测你的麦门消费人格</button>';
+    }
+    html += '</div>';
+    html += '<div class="id-actions">'+
+      '<button class="pbtn sm" id="btnQuiz2">'+(persona? '重新测试人格':'开始人格测试')+'</button>'+
+      '<button class="pbtn sm" id="btnShare">📋 复制分享版身份卡</button>'+
+      '</div>';
+    html += '<div class="idfoot">⚠️ 本等级基于当前可读取的订单（MCP 已同步 '+ (STATS.all&&STATS.all.mcp_count!=null? STATS.all.mcp_count:ORDERS.length) +' 笔，周期 '+ (STATS.all? (STATS.all.start||'')+' ~ '+(STATS.all.end||'') : '—') +'）计算，可能不包含全部历史消费。<br>等级为趣味消费记录，非麦当劳官方认证；数据更新于 '+ (DATA.generated_at||'').replace('T',' ').slice(0,16) +'。</div>';
+    html += '</div>';
+    $('idcard').innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll('#idcard .chip'), function(b){
+      b.addEventListener('click', function(){ curIdMonth = b.getAttribute('data-m'); renderIdentity(); });
+    });
+    var gq = $('goQuiz'), bq = $('btnQuiz2');
+    if(gq) gq.addEventListener('click', openQuiz);
+    if(bq) bq.addEventListener('click', openQuiz);
+    var sh = $('btnShare');
+    if(sh) sh.addEventListener('click', function(){
+      var p = getPersona();
+      var txt = '🍔 麦麦人生身份卡\n' + fmtMonth(curIdMonth) + '\n' +
+        (lv? LEVELS[lv].name : '暂无等级（本月暂无订单）') + '\n' +
+        '本月标签：' + tags.join('、') + '\n' +
+        (p && DIMS[p.main] ? '消费人格：' + DIMS[p.main].name + (p.sub? '（副标签：'+DIMS[p.sub].name+'）':'') + '\n' : '') +
+        '本月点餐：' + s.count + ' 次 · 本月消费：' + (s.count? '¥'+s.amount.toFixed(2).replace(/\.00$/,'') : '—') +
+        ' · 探索餐品：' + s.distinct + ' 种\n' +
+        '由麦麦人生工作台生成 · 非麦当劳官方认证 · 数据周期：' + curIdMonth;
+      copyText(txt, sh);
+    });
+  }
+  renderIdentity();
+
+  /* ---------------- 饮食偏好模块 ---------------- */
+  var PKEY_PREFS = 'mcd_prefs_local_v1';
+  function basePrefs(){
+    var t = PROFILE.taste || {};
+    var b = PROFILE.budget || {};
+    var g = PROFILE.goals || {};
+    return {
+      lunch: b.lunch_weekday != null ? b.lunch_weekday : '',
+      dinner: b.dinner != null ? b.dinner : '',
+      drink: t.beverage_preference || '',
+      dislike: (t.disliked_ingredients || []).slice(),
+      avoid: (t.avoid_items || []).slice(),
+      like: (t.liked_categories || []).slice(),
+      trackCal: !!g.track_calories
+    };
+  }
+  function loadPrefs(){
+    try{
+      var saved = JSON.parse(localStorage.getItem(PKEY_PREFS) || 'null');
+      if(saved) return saved;
+    }catch(e){}
+    return basePrefs();
+  }
+  var PREFS = loadPrefs();
+  function prefsDirty(){
+    return JSON.stringify(basePrefs()) !== JSON.stringify(PREFS);
+  }
+  function savePrefs(){
+    try{ localStorage.setItem(PKEY_PREFS, JSON.stringify(PREFS)); }catch(e){}
+    renderPrefs();
+  }
+  function chipRow(title, key, ph){
+    var html = '<div class="sec-t">'+title+'</div><div class="tagrow" id="pr_'+key+'">';
+    PREFS[key].forEach(function(v,i){
+      html += '<span class="ptag">'+esc(v)+
+        ' <a href="javascript:void(0)" data-k="'+key+'" data-i="'+i+'" class="pr-x" style="font-weight:900;text-decoration:none;color:var(--red)">✕</a></span>';
+    });
+    if(!PREFS[key].length) html += '<span style="font-size:12px;color:var(--muted);font-weight:600">（空）</span>';
+    html += '</div><div style="display:flex;gap:8px;margin-top:6px;max-width:420px">'+
+      '<input id="prin_'+key+'" placeholder="'+ph+'" style="flex:1;border:2px solid var(--line);padding:7px 10px;font-family:inherit;font-size:13px">'+
+      '<button class="pbtn sm" data-add="'+key+'">添加</button></div>';
+    return html;
+  }
+  function renderPrefs(){
+    var html = '';
+    html += '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:4px">'+
+      '<label style="font-weight:700;font-size:13px">午餐预算 ¥ <input id="pr_lunch" type="number" value="'+esc(PREFS.lunch)+'" style="width:72px;border:2px solid var(--line);padding:6px 8px;font-family:inherit"></label>'+
+      '<label style="font-weight:700;font-size:13px">晚餐预算 ¥ <input id="pr_dinner" type="number" value="'+esc(PREFS.dinner)+'" style="width:72px;border:2px solid var(--line);padding:6px 8px;font-family:inherit"></label>'+
+      '<label style="font-weight:700;font-size:13px">饮料偏好 <input id="pr_drink" value="'+esc(PREFS.drink)+'" style="width:170px;border:2px solid var(--line);padding:6px 8px;font-family:inherit"></label>'+
+      '<label style="font-weight:700;font-size:13px"><input id="pr_cal" type="checkbox" '+(PREFS.trackCal?'checked':'')+'> 热量记录</label>'+
+      '</div>';
+    html += chipRow('忌口食材（过敏/不吃，推荐时排除）','dislike','如：洋葱、香菜');
+    html += chipRow('不吃的餐品（整项不推荐）','avoid','如：薯饼、麦香鱼');
+    html += chipRow('喜欢的类别（推荐时优先）','like','如：辣味炸鸡、牛肉堡');
+    html += '<div class="id-actions">'+
+      '<button class="pbtn sm red" id="prSave">保存到本地</button>'+
+      '<button class="pbtn sm" id="prSync">📋 复制同步指令（发给 WorkBuddy 落盘）</button>'+
+      '<button class="pbtn sm" id="prReset">还原为档案版本</button></div>';
+    html += '<div class="note '+(prefsDirty()?'warn':'dim')+'">'+
+      (prefsDirty()
+        ? '⚠️ 本地有未同步的修改：浏览器无法直接写本地文件，点「复制同步指令」发给我，我会复述确认后写入 profile.json 并刷新工作台。'
+        : '当前与档案版本一致。修改后先「保存到本地」，再复制同步指令发我落盘。')+
+      '</div>';
+    $('prefsBox').innerHTML = html;
+    ['lunch','dinner','drink'].forEach(function(k){
+      $('pr_'+k).addEventListener('change', function(){
+        PREFS[k] = (k==='drink') ? this.value.trim() : (this.value==='' ? '' : Number(this.value));
+        savePrefs();
+      });
+    });
+    $('pr_cal').addEventListener('change', function(){ PREFS.trackCal = this.checked; savePrefs(); });
+    ['dislike','avoid','like'].forEach(function(key){
+      Array.prototype.forEach.call(document.querySelectorAll('#pr_'+key+' .pr-x'), function(a){
+        a.addEventListener('click', function(){
+          PREFS[key].splice(Number(a.getAttribute('data-i')),1); savePrefs();
+        });
+      });
+      var btn = document.querySelector('[data-add="'+key+'"]');
+      if(btn) btn.addEventListener('click', function(){
+        var inp = $('prin_'+key); var v = inp.value.trim();
+        if(v && PREFS[key].indexOf(v)<0){ PREFS[key].push(v); savePrefs(); }
+      });
+    });
+    $('prSave').addEventListener('click', function(){ savePrefs(); });
+    $('prSync').addEventListener('click', function(){
+      var txt = '更新我的麦门档案偏好：忌口食材=['+PREFS.dislike.join('、')+']；不吃的餐品=['+PREFS.avoid.join('、')+
+        ']；喜欢的类别=['+PREFS.like.join('、')+']；饮料偏好='+PREFS.drink+'；午餐预算=¥'+PREFS.lunch+'；晚餐预算=¥'+PREFS.dinner+
+        '；热量记录='+(PREFS.trackCal?'开启':'关闭')+'。请确认后写入 profile.json 并同步工作台。';
+      copyText(txt, this);
+    });
+    $('prReset').addEventListener('click', function(){
+      try{ localStorage.removeItem(PKEY_PREFS); }catch(e){}
+      PREFS = basePrefs(); renderPrefs();
+    });
+  }
+  renderPrefs();
+  /* 饮食偏好折叠：默认收起，点标题开合 */
+  (function prefsCollapse(){
+    var t = $('prefsToggle'), box = $('prefsBox');
+    t.addEventListener('click', function(e){
+      if(e.target.closest('input,button,a')) return;
+      var open = box.classList.toggle('hidden') === false;
+      t.classList.toggle('open', open);
+      var c = t.querySelector('.caret'); if(c) c.textContent = open ? '▼' : '▶';
+    });
+  })();
+
+  /* ---------------- header ---------------- */
+  $('generatedAt').textContent = '数据更新于 ' + (DATA.generated_at || '').replace('T',' ').slice(0,16);
+  (function pills(){
+    var out = [];
+    if(PROFILE.city) out.push('<span class="pill">城市 <b>' + esc(PROFILE.city) + '</b></span>');
+    var stores = PROFILE.stores || [];
+    if(stores.length) out.push('<span class="pill">常用门店 <b>' + esc(stores[0].name || stores[0]) +
+      (stores.length>1 ? ' 等'+stores.length+'家' : '') + '</b></span>');
+    var ch = PROFILE.preferred_channels || [];
+    if(ch.length) out.push('<span class="pill">方式 <b>' + esc(ch.join(' / ')) + '</b></span>');
+    var b = PROFILE.budget || {};
+    if(b.lunch_weekday != null) out.push('<span class="pill">午餐预算 <b>¥' + esc(b.lunch_weekday) + '</b></span>');
+    var activeRules = (PROFILE.temp_rules||[]).filter(function(r){ return r.status === 'active'; });
+    if(activeRules.length) out.push('<span class="pill">临时规则 <b>' + activeRules.length + ' 条</b></span>');
+    if(!out.length) out.push('<span class="pill">尚未建立麦门档案 · 说「更新我的麦门档案」</span>');
+    $('profilePills').innerHTML = out.join('');
+  })();
+
+  /* ---------------- KPIs ---------------- */
+  var monthStats0 = STATS.month || {};
+  var last30 = STATS.last30 || {};
+  function kpi(k, v, unit, x, accent){
+    return '<div class="kpi'+(accent?' accent':'')+'"><div class="k">'+k+'</div>'+
+           '<div class="v">'+v+(unit?'<small>'+unit+'</small>':'')+'</div>'+
+           (x?'<div class="x">'+x+'</div>':'')+'</div>';
+  }
+  (function kpis(){
+    var m = monthStats0;
+    var html = '';
+    html += kpi('本月订单', (m.orders_count==null?'—':m.orders_count), '笔',
+                m.mcp_count||m.manual_count ? ('MCP '+m.mcp_count+' / 手动 '+m.manual_count) : '');
+    html += kpi('本月消费', money(m.total_spend), '', '');
+    html += kpi('平均客单价', m.avg_price==null?'—':money(m.avg_price), '',
+                last30.avg_price!=null && m.avg_price!=null ? ('近30天 '+money(last30.avg_price)) : '');
+    html += kpi('优惠节省', m.discount_total==null?'—':money(m.discount_total), '',
+                m.discount_missing_count ? (m.discount_missing_count+' 笔优惠未知') : '', true);
+    var calTxt = (m.calories_known+m.calories_estimated) > 0 ? Math.round(m.calories_known+m.calories_estimated) : '—';
+    html += kpi('本月已记录热量', calTxt, calTxt==='—'?'':'kcal',
+                '已知 '+Math.round(m.calories_known||0)+' / 估算 '+Math.round(m.calories_estimated||0));
+    $('kpis').innerHTML = html;
+    $('monthRange').textContent = TODAY.slice(0,7) + '（月初至今）';
+  })();
+
+  /* ---------------- calendar ---------------- */
+  var cur = TODAY.slice(0,7);
+  function renderCal(){
+    var y = Number(cur.slice(0,4)), mo = Number(cur.slice(5,7));
+    $('calTitle').textContent = y + ' 年 ' + mo + ' 月';
+    var first = new Date(y, mo-1, 1);
+    var lead = (first.getDay() + 6) % 7;
+    var days = new Date(y, mo, 0).getDate();
+    var html = '';
+    for(var i=0;i<lead;i++) html += '<div class="cell blank"></div>';
+    for(var d=1;d<=days;d++){
+      var key = y+'-'+pad(mo)+'-'+pad(d);
+      var list = DAYS[key] || [];
+      if(list.length){
+        var sm = daySummary(list);
+        var cls = 'cell has' + (key===TODAY ? ' today' : '');
+        var tags = '';
+        if(sm.est) tags += '<span class="mini est">估算</span>';
+        if(sm.manual) tags += '<span class="mini manual">手动</span>';
+        if(sm.cal!=null && !sm.est) tags += '<span class="mini cal">'+Math.round(sm.cal)+'k</span>';
+        html += '<div class="'+cls+'" data-day="'+key+'">'+
+                  '<div class="burger-stamp" title="这天吃过麦当劳">🍔</div>'+
+                  '<div class="d"><span>'+d+'</span><span class="dot"></span></div>'+
+                  '<div class="amt">'+money(sm.amount)+'</div>'+
+                  '<div class="it">'+esc(sm.items.slice(0,2).join('、'))+(sm.items.length>2?'…':'')+'</div>'+
+                  '<div class="tags">'+tags+'</div>'+
+                '</div>';
+      } else {
+        html += '<div class="cell'+(key===TODAY?' today':'')+'"><div class="d"><span>'+d+'</span></div></div>';
+      }
+    }
+    $('calGrid').innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll('.cell.has'), function(el){
+      el.addEventListener('click', function(){ openDay(el.getAttribute('data-day')); });
+    });
+  }
+  $('prevM').addEventListener('click', function(){
+    var y = Number(cur.slice(0,4)), mo = Number(cur.slice(5,7)) - 1;
+    if(mo < 1){ mo = 12; y--; }
+    cur = y + '-' + pad(mo); renderCal();
+  });
+  $('nextM').addEventListener('click', function(){
+    var y = Number(cur.slice(0,4)), mo = Number(cur.slice(5,7)) + 1;
+    if(mo > 12){ mo = 1; y++; }
+    cur = y + '-' + pad(mo); renderCal();
+  });
+  renderCal();
+
+  /* ---------------- today ---------------- */
+  (function todayBox(){
+    var list = DATA.today_orders || [];
+    $('todayLabel').textContent = TODAY + ' · ' + (list.length ? list.length+' 笔订单' : '今日暂无记录');
+    if(!list.length){
+      $('todayBox').innerHTML = '<div class="empty">今天还没有麦当劳订单记录。<br>下单后可以说「记录我今天的订单」，或让我读取 MCP 订单。</div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function(o){
+      var sm = daySummary([o]);
+      html += '<div class="today-row">'+
+        '<div class="t">' + esc(o.channel || '—') + '</div>'+
+        '<div class="m"><div class="s1">' + esc(o.store || '未知门店') + '</div>'+
+        '<div class="s2">' + esc(o.items || '—') +
+        (sm.cal != null ? ' · 约 '+Math.round(sm.cal)+' kcal' + (o.data_source==='estimate'?'（估算）':'（已记录）') : ' · 热量未记录') +
+        '</div></div>'+
+        '<div class="p">' + money(o.total_price_num) + '</div>'+
+      '</div>';
+    });
+    $('todayBox').innerHTML = html;
+  })();
+
+  /* ---------------- trend ---------------- */
+  function lastDays(n){
+    var arr = [], base = new Date(TODAY + 'T00:00:00');
+    for(var i=n-1;i>=0;i--){
+      var d = new Date(base.getTime() - i*86400000);
+      arr.push(d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()));
+    }
+    return arr;
+  }
+  function drawChart(svgId, capId, days, valueOf, color, unit){
+    var svg = $(svgId);
+    var vals = days.map(valueOf);
+    var max = Math.max.apply(null, vals.concat([0]));
+    var W = 640, H = 132, padL = 6, padB = 20, padT = 8;
+    var bw = (W - padL*2) / days.length;
+    var parts = [], known = 0, missing = 0;
+    vals.forEach(function(v,i){
+      if(v == null){ missing++; return; }
+      known++;
+      var h = max > 0 ? (v / max) * (H - padB - padT) : 0;
+      if(v > 0 && h < 2) h = 2;
+      var x = padL + i*bw + bw*0.16, w = bw*0.68;
+      var y = H - padB - h;
+      parts.push('<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="'+color+'" opacity="'+(v>0?0.95:0.18)+'"></rect>');
+    });
+    parts.push('<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padL)+'" y2="'+(H-padB)+'" stroke="#2B1A12" stroke-width="2"></line>');
+    days.forEach(function(d,i){
+      var isLast = i === days.length-1;
+      var ok = (i % 7 === 0) || (isLast && (days.length-1) % 7 > 2);
+      if(ok){
+        parts.push('<text x="'+(padL+i*bw+bw/2).toFixed(1)+'" y="'+(H-5)+'" font-size="10" fill="#5C4A3D" text-anchor="middle">'+d.slice(5)+'</text>');
+      }
+    });
+    if(max > 0){
+      parts.push('<text x="'+padL+'" y="12" font-size="10" fill="#5C4A3D">峰值 '+ (unit==='¥'?money(max):Math.round(max)) +'</text>');
+    }
+    svg.innerHTML = parts.join('');
+    var avg = null;
+    if(known){
+      var sum = 0; vals.forEach(function(v){ if(v!=null) sum += v; });
+      avg = sum / known;
+    }
+    $(capId).innerHTML = '共 ' + known + ' 天有记录' + (missing ? '，' + missing + ' 天未记录' : '') +
+      (avg != null ? ' · 日均 ' + (unit==='¥' ? money(avg) : Math.round(avg)+' kcal') : '');
+  }
+  var D30 = lastDays(30);
+  drawChart('spendChart', 'spendCap', D30, function(k){
+    var list = DAYS[k]; if(!list) return null;
+    var sm = daySummary(list); return sm.amount == null ? null : sm.amount;
+  }, '#DA291C', '¥');
+  drawChart('calChart', 'calCap', D30, function(k){
+    var list = DAYS[k]; if(!list) return null;
+    var sm = daySummary(list); return sm.cal;
+  }, '#FFC72C', 'kcal');
+
+  (function trendNote(){
+    var sm = STATS.last30 || {};
+    var notes = [];
+    if(sm.top_items && sm.top_items.length)
+      notes.push('最近 30 天最常点：' + sm.top_items.slice(0,3).map(function(i){ return esc(i.name)+'×'+i.count; }).join('、'));
+    if(sm.repeat_rate != null) notes.push('餐品重复率 ' + Math.round(sm.repeat_rate*100) + '%');
+    notes.push('以上为已记录数据的观察结果，不代表完整饮食情况，也不构成营养建议。');
+    $('trendNote').innerHTML = notes.join(' · ');
+  })();
+
+  /* ---------------- entries ---------------- */
+  var ENTRIES = ['看看今天吃什么','同步最新订单并刷新等级','生成我的麦门身份卡','测测我的麦门消费人格',
+                 '找出今天最划算的点法','分析我最近的麦当劳消费','查看本月账本','更新我的麦门档案','补录一笔麦当劳订单'];
+  (function entries(){
+    $('entryChips').innerHTML = ENTRIES.map(function(t){
+      return '<button class="chip" data-say="'+esc(t)+'">'+esc(t)+'</button>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('#entryChips .chip'), function(b){
+      b.addEventListener('click', function(){
+        var txt = b.getAttribute('data-say');
+        var done = function(){ var o = b.textContent; b.textContent = '已复制 ✓'; setTimeout(function(){ b.textContent = o; }, 1200); };
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(done, function(){ fallback(txt, done); });
+        } else { fallback(txt, done); }
+      });
+    });
+    function fallback(txt, cb){
+      var ta = document.createElement('textarea'); ta.value = txt;
+      ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta); cb();
+    }
+  })();
+
+  /* ---------------- recent orders ---------------- */
+  (function recent(){
+    var rows = ORDERS.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }).slice(0,12);
+    $('ordersHint').textContent = ORDERS.length ? ('共 ' + ORDERS.length + ' 笔记录') : '暂无记录';
+    if(!rows.length){
+      $('recentBox').innerHTML = '<div class="empty">还没有订单记录。可以让我读取 MCP 近期订单，或说「补录一笔麦当劳订单」手动添加。</div>';
+      return;
+    }
+    var html = '<table><thead><tr><th>日期</th><th>门店 / 方式</th><th>餐品</th><th class="num">实付</th><th class="num">热量</th><th>来源</th></tr></thead><tbody>';
+    rows.forEach(function(o){
+      var est = o.data_source === 'estimate';
+      html += '<tr>'+
+        '<td><a href="javascript:void(0)" data-day="'+esc(o.date)+'" class="daylink" style="font-weight:800">'+esc(o.date)+'</a></td>'+
+        '<td>'+esc(o.store||'—')+'<div style="font-size:11.5px;color:#9A8B7E">'+esc(o.channel||'')+'</div></td>'+
+        '<td style="max-width:280px">'+esc(o.items||'—')+'</td>'+
+        '<td class="num">'+money(o.total_price_num)+'</td>'+
+        '<td class="num">'+(o.calories_num!=null ? Math.round(o.calories_num)+(est?'（估算）':'') : '未记录')+'</td>'+
+        '<td>'+(o.data_source==='manual' ? '<span class="mini manual">手动</span>'
+              : o.data_source==='estimate' ? '<span class="mini est">估算</span>'
+              : '<span class="mini">MCP</span>')+'</td>'+
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    $('recentBox').innerHTML = html;
+    Array.prototype.forEach.call(document.querySelectorAll('.daylink'), function(el){
+      el.addEventListener('click', function(){ openDay(el.getAttribute('data-day')); });
+    });
+  })();
+
+  /* ---------------- drawer ---------------- */
+  function openDay(key){
+    var list = DAYS[key] || [];
+    $('dTitle').textContent = key;
+    var dow = ['周日','周一','周二','周三','周四','周五','周六'][new Date(key+'T00:00:00').getDay()];
+    $('dSub').textContent = dow + ' · ' + (list.length ? list.length + ' 笔订单' : '无记录');
+    if(!list.length){
+      $('dBody').innerHTML = '<div class="empty">这一天没有麦当劳订单记录。</div>';
+      show();
+      return;
+    }
+    var html = '';
+    list.forEach(function(o){
+      var est = o.data_source === 'estimate';
+      html += '<div class="sec-t">' + esc(o.store || '未知门店') + ' · ' + money(o.total_price_num) + '</div>';
+      html += '<div class="kv">';
+      html += '<div class="k">就餐方式</div><div>' + esc(o.channel || '—') + '</div>';
+      html += '<div class="k">订单编号</div><div>' + (o.order_id ? esc(o.order_id) : '未提供') + '</div>';
+      html += '<div class="k">实付金额</div><div>' + money(o.total_price_num) + '</div>';
+      html += '<div class="k">优惠金额</div><div>' + (o.discount_num != null ? money(o.discount_num) : '未知') + '</div>';
+      html += '<div class="k">数据来源</div><div>' + (o.data_source === 'manual' ? '用户手动补录' : o.data_source === 'estimate' ? '用户估算' : 'MCP 自动读取') + '</div>';
+      html += '</div>';
+      html += '<div class="sec-t">餐品明细</div>';
+      var nut = o.nutrition || [];
+      var nutMap = {};
+      nut.forEach(function(n){ nutMap[n.item_name] = n; });
+      html += '<table><thead><tr><th>餐品</th><th class="num">数量</th><th class="num">热量</th></tr></thead><tbody>';
+      (o.items_list || []).forEach(function(it){
+        var n = nutMap[it.name];
+        var cv = n && n.calories != null
+          ? Math.round(n.calories) + ' kcal' + (n.confidence === 'estimated' ? '（估算）' : n.confidence === 'unknown' ? '（未知）' : '')
+          : '未记录';
+        html += '<tr><td>'+esc(it.name)+'</td><td class="num">'+it.qty+'</td><td class="num">'+cv+'</td></tr>';
+      });
+      html += '</tbody></table>';
+      var miss = [];
+      if(o.discount_num == null) miss.push('优惠金额');
+      if(o.calories_num == null) miss.push('热量');
+      if(!o.order_id) miss.push('订单编号');
+      html += '<div class="note ' + (o.data_source === 'manual' ? 'info' : (miss.length ? 'warn' : 'dim')) + '">' +
+        (o.data_source === 'manual' ? '本条为<b>手动补录</b>数据，未经 MCP 校验。' : '') +
+        (miss.length ? ' 数据完整度：缺失 ' + miss.join('、') + '，已在界面上标注为未知，未做推算填充。' : ' 数据完整。') +
+        (o.data_source === 'estimate' ? ' 热量为用户估算值，仅供记录参考。' : '') +
+        '</div>';
+      html += '<div style="height:14px"></div>';
+    });
+    $('dBody').innerHTML = html;
+    show();
+  }
+  function show(){ $('mask').classList.add('on'); $('drawer').classList.add('on'); }
+  function hide(){ $('mask').classList.remove('on'); $('drawer').classList.remove('on'); }
+  $('mask').addEventListener('click', function(){ hide(); closeQuiz(); });
+  $('dClose').addEventListener('click', hide);
+  $('qClose').addEventListener('click', closeQuiz);
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ hide(); closeQuiz(); } });
+
+  /* ---------------- footer meta ---------------- */
+  (function foot(){
+    var s = STATS.all || {};
+    var src = '共 ' + (s.orders_count||0) + ' 笔记录（MCP ' + (s.mcp_count||0) + ' · 手动 ' + (s.manual_count||0) + '）';
+    $('footMeta').textContent = src + ' · 数据目录 麦麦人生工作台数据 · 生成时间 ' + (DATA.generated_at||'').replace('T',' ').slice(0,16);
+  })();
+})();
+</script>
+</body>
+</html>

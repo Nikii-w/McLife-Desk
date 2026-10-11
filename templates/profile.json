@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "created_at": null,
+    "updated_at": null,
+    "note": "字段为 null 表示用户尚未提供或选择跳过；所有内容必须经用户确认后才写入"
+  },
+  "budget": {
+    "weekday_lunch": null,
+    "dinner": null
+  },
+  "city_or_area": null,
+  "dining_modes": [],
+  "preferences": {
+    "favorite_categories": [],
+    "avoid_items": [],
+    "dietary_restrictions": [],
+    "drink_preference": null,
+    "setmeal_substitution_ok": null,
+    "track_calories": false
+  },
+  "goals": {
+    "weekly_order_target": null,
+    "per_order_target": null
+  },
+  "allow_order_sync": null,
+  "preferred_stores": []
+}
