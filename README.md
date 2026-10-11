@@ -26,10 +26,9 @@
 
 **记录每一次点麦，也记录你正在经历的人生。**
 
-如果你也想知道自己本月是哪一等级、属于哪种麦门人格，欢迎安装试试。觉得这个工作台有点意思，或者它刚好帮到了你，欢迎点一下右上角的 ⭐ Star，让更多人一起看看自己的麦门人生。
+如果你也想知道自己本月是哪一等级、属于哪种麦门人格，欢迎安装试试。觉得这个工作台有点意思，或者它刚好帮到了你，**欢迎点一下右上角的 ⭐ Star**，让更多人一起看看自己的麦门人生。
 
-<img width="1152" height="1920" alt="image" src="https://github.com/user-attachments/assets/c7ee456f-1b0d-4582-8782-919b6d6423c6" />
-
+<img width="1152" height="1920" alt="image" src="https://github.com/user-attachments/assets/7f7d3abb-32dc-4085-8cfc-1c3cfb9f40d1" />
 
 ---
 
