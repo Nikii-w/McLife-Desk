@@ -28,8 +28,7 @@
 
 如果你也想知道自己本月是哪一等级、属于哪种麦门人格，欢迎安装试试。觉得这个工作台有点意思，或者它刚好帮到了你，欢迎点一下右上角的 ⭐ Star，让更多人一起看看自己的麦门人生。
 
-> 🖼️ **首屏海报占位**：建议放一张展示“麦麦人生工作台”主题和核心标语的主视觉图。  
-> 建议文件名：`assets/hero-poster.png`
+![McLife Desk 首屏海报](assets/hero-poster.png)
 
 ---
 
@@ -80,8 +79,7 @@
 
 首次使用时，可以告诉工作台你的常用城市或门店、预算、忌口、饮料偏好和是否记录热量。门店信息仍需通过 MCP 查询确认，避免使用过时信息。
 
-> 🖼️ **工作台截图占位**：建议放一张包含日历、等级卡、账本和功能标签的真实 WorkBuddy 工作台截图。  
-> 建议文件名：`assets/workbench-overview.png`
+![WorkBuddy 麦麦人生工作台实拍](assets/workbench-overview.jpg)
 
 ---
 
@@ -158,7 +156,8 @@ mc-life-desk/
 ├── mcp-config.example.json   # MCP 配置示例，不含真实 Token
 ├── references/               # 规则、数据结构、工具说明
 ├── examples/                 # 首次使用示例
-└── templates/                # 工作台与报告模板
+├── templates/                # 工作台与报告模板
+└── assets/                   # README 海报与工作台截图
 ```
 
 ## 📌 项目声明
