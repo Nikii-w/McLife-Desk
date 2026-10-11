@@ -88,6 +88,7 @@
 ### 1️⃣ 准备自己的 MCP
 
 申请属于自己的麦当劳 MCP Token，并在 WorkBuddy 中配置 MCP Connector。
+![📖 MCP 使用指南：东亚 MCP Server GitHub 使用指南](https://github.com/M-China/mcd-mcp-server)
 
 ### 2️⃣ 安装 Skill
 
