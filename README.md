@@ -28,7 +28,8 @@
 
 如果你也想知道自己本月是哪一等级、属于哪种麦门人格，欢迎安装试试。觉得这个工作台有点意思，或者它刚好帮到了你，**欢迎点一下右上角的 ⭐ Star**，让更多人一起看看自己的麦门人生。
 
-<img width="1440" height="2560" alt="image" src="https://github.com/user-attachments/assets/a9e457e8-1e15-4379-9c6a-a9feb2d80a3f" />
+<img width="1440" height="2560" alt="image" src="https://github.com/user-attachments/assets/8827dad6-e886-47ea-a1ac-ce6cf89206d9" />
+
 
 
 ---
